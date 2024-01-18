@@ -1,23 +1,30 @@
-function saveOptions(e) {
-    e.preventDefault();
-    browser.storage.sync.set({
-      token: document.querySelector("#token").value,
-    });
-  }
-  
-  function restoreOptions() {
-    function setCurrentChoice(result) {
-      document.querySelector("#token").value = result.token || '';
+function saveOptions (e) {
+  ['token', 'periodInMinutes'].forEach((key) => {
+    const value = document.querySelector(`#${key}`).value
+    if (snapshot[key] !== value) {
+      snapshot[key] = value
+      if (value) {
+        browser.storage.sync.set({ [key]: value })
+      } else {
+        browser.storage.sync.remove(key)
+      }
     }
-  
-    function onError(error) {
-      console.log(`Error: ${error}`);
-    }
-  
-    let getting = browser.storage.sync.get("token");
-    getting.then(setCurrentChoice, onError);
-  }
-  
-  document.addEventListener("DOMContentLoaded", restoreOptions);
-  document.querySelector("form").addEventListener("submit", saveOptions);
-  
+  })
+
+  e.preventDefault()
+}
+let snapshot
+function restoreOptions () {
+  browser.storage.sync.get()
+    .then(options => {
+      snapshot = options
+      for (const [key, value] of Object.entries(options)) {
+        if (value) {
+          document.querySelector(`#${key}`).value = value
+        }
+      }
+    })
+}
+
+document.addEventListener('DOMContentLoaded', restoreOptions)
+document.querySelector('form').addEventListener('submit', saveOptions)
