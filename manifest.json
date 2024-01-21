@@ -1,5 +1,4 @@
 {
-
   "description": "Adds a flag icon to the toolbar indicating your IP geolocation.",
   "manifest_version": 2,
   "name": "whereami",
@@ -9,9 +8,7 @@
   "background": {
     "scripts": ["background.js"]
   },
-  "permissions": [
-    "alarms", "storage"
-  ],
+  "permissions": ["alarms", "storage"],
   "browser_action": {
     "default_popup": "popup.html",
     "default_title": "Display more information about your IP address",
