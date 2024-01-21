@@ -1,23 +1,28 @@
+var ipInfo
+
 function makeUpdate (token) {
   let addr
 
   return function () {
+    console.debug('Updating.')
     fetch('https://api.ipify.org')
       .then((response) => response.text())
       .then((text) => {
         if (addr !== text) {
           addr = text
-          console.log(`IP address changed to ${addr}.`)
+          console.info(`IP address changed to ${addr}.`)
           fetch(`https://ipinfo.io/${addr}?token=${token}`)
             .then((response) => response.json())
             .then((json) => {
+              const now = new Date()
+              json.updated = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`
+              ipInfo = json
               browser.browserAction.setIcon({
                 path: {
                   16: `icons/${json.country}.svg`.toLowerCase(),
                   32: `icons/${json.country}.svg`.toLowerCase()
                 }
               })
-              browser.browserAction.setTitle({ title: addr })
             })
         }
       })
@@ -55,11 +60,12 @@ const periodInMinutesChanged = (function () {
   let periodInMinutes
 
   return function (newValue) {
-    if (periodInMinutes !== newValue) {
-      periodInMinutes = newValue
-      periodInMinutes = parseFloat(periodInMinutes) || 0.5
+    const newPeriodInMinutes = parseFloat(newValue) || 0.5
+    if (periodInMinutes !== newPeriodInMinutes) {
+      periodInMinutes = newPeriodInMinutes
       browser.alarms.clearAll()
       browser.alarms.create('periodic-update', { periodInMinutes })
+      console.debug(`Scheduled update every ${periodInMinutes} minutes.`)
     }
   }
 })()
