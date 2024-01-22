@@ -17,6 +17,10 @@
       "32": "icons/xx.svg"
     }
   },
+  "icons": {
+    "48": "icons/main.svg",
+    "96": "icons/main.svg"
+  },  
   "options_ui": {
     "page": "options.html"
   },
