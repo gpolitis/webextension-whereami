@@ -1,4 +1,4 @@
-var ipInfo;
+var state = {};
 var update;
 
 function makeUpdate(token) {
@@ -7,15 +7,16 @@ function makeUpdate(token) {
     fetch("https://api.ipify.org")
       .then((response) => response.text())
       .then((addr) => {
-        if (!ipInfo || ipInfo.ip !== addr) {
+        const now = new Date();
+        state.checkTime = now.toLocaleString();
+        if (!state.ipInfo || state.ipInfo.ip !== addr) {
           console.info(`IP address changed to ${addr}.`);
           fetch(`https://ipinfo.io/${addr}?token=${token}`)
             .then((response) => response.json())
             .then((json) => {
-              const now = new Date();
-              json.updated = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
-              ipInfo = json;
-              browser.browserAction.setBadgeText({ text: "" })
+              state.modifiedTime = state.checkTime;
+              state.ipInfo = json;
+              browser.browserAction.setBadgeText({ text: "" });
               browser.browserAction.setIcon({
                 path: {
                   16: `icons/${json.country}.svg`.toLowerCase(),
@@ -23,7 +24,9 @@ function makeUpdate(token) {
                 },
               });
             })
-            .catch((error) => browser.browserAction.setBadgeText({ text: "!" }));
+            .catch((error) =>
+              browser.browserAction.setBadgeText({ text: "!" })
+            );
         }
       })
       .catch((error) => browser.browserAction.setBadgeText({ text: "!" }));

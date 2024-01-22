@@ -2,7 +2,7 @@ browser.runtime
   .getBackgroundPage()
   .then((page) => {
     document.getElementById("json").textContent = JSON.stringify(
-      page.ipInfo,
+      page.state,
       undefined,
       2
     );
