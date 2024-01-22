@@ -2,7 +2,7 @@
   "description": "Adds a flag icon to the toolbar indicating your IP geolocation.",
   "manifest_version": 2,
   "name": "whereami",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "homepage_url": "https://github.com/gpolitis/webextension-whereami",
 
   "background": {
