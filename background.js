@@ -1,20 +1,17 @@
 var state = {};
 var update;
 
-function backgroundError(key, value) {
-  if (value) {
-    state.error ??= {};
-    state.error[key] = value.toString();
-  } else if (state.error) {
-    delete state.error[key];
+function updateState(source) {
+  state = Object.assign(state, source);
+  document.dispatchEvent(new Event("stateChanged"));
+}
 
-    const errorSize = Object.keys(state.error).length;
-    if (errorSize == 0) {
-      delete state.error;
-    }
-  }
-
-  browser.browserAction.setBadgeText({ text: state.error ? "!" : "" });
+function makeState(target, source) {
+  return Object.fromEntries(
+    Object.entries(Object.assign(target || {}, source)).filter(
+      ([_, v]) => v != null
+    )
+  );
 }
 
 function makeUpdate(token) {
@@ -23,18 +20,21 @@ function makeUpdate(token) {
     fetch("https://api.ipify.org")
       .then((response) => response.text())
       .then((addr) => {
-        backgroundError("ipGet");
         const now = new Date();
-        state.checkTime = now.toLocaleString();
+        updateState({
+          error: makeState(state.error, { ipGet: null }),
+          checkTime: now.toLocaleString(),
+        });
         if (!state.ipInfo || state.ipInfo.ip !== addr) {
           console.info(`IP address changed to ${addr}.`);
           fetch(`https://ipinfo.io/${addr}?token=${token}`)
             .then((response) => response.json())
             .then((json) => {
-              backgroundError("ipInfo");
-              state.modifiedTime = state.checkTime;
-              state.ipInfo = json;
-              browser.browserAction.setBadgeText({ text: "" });
+              updateState({
+                error: makeState(state.error, { ipInfo: null }),
+                modifiedTime: state.checkTime,
+                ipInfo: json,
+              });
               browser.browserAction.setIcon({
                 path: {
                   16: `icons/${json.country}.svg`.toLowerCase(),
@@ -42,10 +42,18 @@ function makeUpdate(token) {
                 },
               });
             })
-            .catch((error) => backgroundError("ipInfo", error));
+            .catch((error) =>
+              updateState({
+                error: makeState(state.error, { ipInfo: error.toString() }),
+              })
+            );
         }
       })
-      .catch((error) => backgroundError("ipGet", error));
+      .catch((error) =>
+        updateState({
+          error: makeState(state.error, { ipGet: error.toString() }),
+        })
+      );
   };
 }
 
@@ -89,14 +97,26 @@ const periodInMinutesChanged = (function () {
   };
 })();
 
+document.addEventListener("stateChanged", function () {
+  browser.browserAction.setBadgeText({
+    text: Object.keys(state.error).length ? "!" : "",
+  });
+});
+
 browser.storage.sync
   .get()
   .then((options) => {
-    backgroundError("sync");
+    updateState({
+      error: makeState(state.error, { sync: null }),
+    });
     tokenChanged(options.token);
     periodInMinutesChanged(options.periodInMinutes);
   })
-  .catch((error) => backgroundError("sync", error));
+  .catch((error) =>
+    updateState({
+      error: makeState(state.error, { sync: error.toString() }),
+    })
+  );
 
 browser.storage.sync.onChanged.addListener((changes) => {
   if (changes.token) {
