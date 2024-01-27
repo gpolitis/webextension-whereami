@@ -1,31 +1,14 @@
 function saveOptions(e) {
-  ["token", "periodInMinutes"].forEach((key) => {
-    const value = document.querySelector(`#${key}`).value;
-    if (snapshot[key] !== value) {
-      snapshot[key] = value;
-      if (value) {
-        browser.storage.sync.set({ [key]: value });
-      } else {
-        browser.storage.sync.remove(key);
-      }
-    }
-  });
-
   e.preventDefault();
+  void browser.storage.sync.set({
+    token: document.querySelector(`#token`).value,
+  });
 }
-let snapshot;
+
 function restoreOptions() {
-  browser.storage.sync
-    .get()
-    .then((options) => {
-      snapshot = options;
-      for (const [key, value] of Object.entries(options)) {
-        if (value) {
-          document.querySelector(`#${key}`).value = value;
-        }
-      }
-    })
-    .catch((error) => console.error(error.message));
+  browser.storage.sync.get("token").then((item) => {
+    document.querySelector(`#token`).value = item.token || "";
+  });
 }
 
 document.addEventListener("DOMContentLoaded", restoreOptions);

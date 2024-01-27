@@ -1,13 +1,8 @@
 {
   "dependencies": {
-    "@types/firefox-webext-browser": "^120.0.0",
-    "immer": "^10.0.3"
-  },
-  "type": "module",
-  "scripts": {
-    "build": "vite build"
+    "@types/firefox-webext-browser": "^120.0.0"
   },
   "devDependencies": {
-    "vite": "^5.0.12"
+    "prettier": "^3.2.4"
   }
 }
