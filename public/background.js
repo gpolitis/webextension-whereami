@@ -1,7 +1,7 @@
 async function update() {
   console.info("Checking for IP address changes.");
   const now = new Date();
-  await browser.storage.session.set({ lastChecked: now.toLocaleString() });
+  await browser.storage.session.set({ checked: now.toLocaleString() });
 
   const response = await fetch("https://api.ipify.org");
   const ip = await response.text();
@@ -19,7 +19,7 @@ async function update() {
       ipInfo = await response.json();
     }
     await browser.storage.session.set({
-      lastModified: now.toLocaleString(),
+      modified: now.toLocaleString(),
       ipInfo,
     });
   }
@@ -36,7 +36,7 @@ browser.runtime.onMessage.addListener(function (message) {
 browser.storage.session.onChanged.addListener((changes) => {
   if (changes.ipInfo) {
     const json = changes.ipInfo.newValue;
-    void browser.browserAction.setIcon({
+    void browser.action.setIcon({
       path: {
         16: `icons/${json.country}.svg`.toLowerCase(),
         32: `icons/${json.country}.svg`.toLowerCase(),
