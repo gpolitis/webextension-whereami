@@ -5,22 +5,18 @@ function stateChanged(state) {
     2
   );
 }
-
+browser.runtime.onMessage.addListener((message) =>
+  stateChanged(message.baseState)
+);
 browser.runtime
-  .getBackgroundPage()
-  .then((page) => {
-    page.document.addEventListener('stateChanged', () => stateChanged(page.state))
-    stateChanged(page.state)
-  })
-  .catch((error) => console.error(error.message));
+  .sendMessage({ action: "getState" })
+  .then((response) => stateChanged(response.baseState))
+  .catch((error) => console.error(error));
 
 document.querySelector("button").addEventListener("click", function () {
   browser.runtime
-    .getBackgroundPage()
-    .then((page) => {
-      page.update();
-    })
-    .catch((error) => console.error(error.message));
+    .sendMessage({ action: "updateAddrInfo" })
+    .catch((error) => console.error(error));
 });
 
 // TODO needs to listen for options changes (=> enable/disable the update button).

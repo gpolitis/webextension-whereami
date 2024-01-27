@@ -6,7 +6,9 @@
   "homepage_url": "https://github.com/gpolitis/webextension-whereami",
 
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["dist/immer.mjs", "background.mjs"],
+    "type": "module",
+    "persistent": false
   },
   "permissions": ["alarms", "storage"],
   "browser_action": {
