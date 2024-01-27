@@ -5,6 +5,9 @@ let baseState = {};
 
 function updateState(recipe) {
   baseState = produce(baseState, (draftState) => recipe(draftState), undefined);
+  browser.browserAction.setBadgeText({
+    text: Object.keys(baseState.error || {}).length ? "!" : "",
+  }).catch(error => console.error(error));
   browser.runtime.sendMessage({ baseState }).catch((error) => {
     // console.debug(error);
   });
@@ -105,12 +108,6 @@ const periodInMinutesChanged = (function () {
     }
   };
 })();
-
-document.addEventListener("stateChanged", function () {
-  browser.browserAction.setBadgeText({
-    text: Object.keys(baseState.error || {}).length ? "!" : "",
-  }).catch(error => console.error(error));
-});
 
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   switch (request.action) {
