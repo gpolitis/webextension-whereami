@@ -1,27 +1,36 @@
 async function update() {
   console.info("Checking for IP address changes.");
   const now = new Date();
-  await browser.storage.session.set({ checked: now.toLocaleString() });
+  let changes = { checked: now.toLocaleString() };
 
   const response = await fetch("https://api.ipify.org");
   const ip = await response.text();
 
-  const item = await browser.storage.session.get("ipInfo");
-  if (!item.ipInfo || item.ipInfo.ip !== ip) {
-    console.info(`IP address changed to ${ip}.`);
-    let ipInfo = { ip, country: "xx" };
-    const item = await browser.storage.sync.get("token");
-    if (item.token) {
-      console.info(`Fetching rich IP information.`);
+  const { ipInfo, geolocated } = await browser.storage.session.get([
+    "ipInfo",
+    "geolocated",
+  ]);
+  if (!ipInfo || ipInfo.ip !== ip || !geolocated) {
+    const { token } = await browser.storage.sync.get("token");
+    if (token) {
+      console.info(`Fetching IP address information for ${ip}.`);
       const response = await fetch(
-        `https://ipinfo.io/${ip}?token=${item.token}`,
+        `https://ipinfo.io/${ip}?token=${token}`,
       );
-      ipInfo = await response.json();
+      await browser.storage.session.set({
+        ...changes,
+        geolocated: now.toLocaleString(),
+        ipInfo: await response.json(),
+      });
+    } else if (!ipInfo || ipInfo.ip !== ip) {
+      console.info(`IP address changed to ${ip}.`);
+      await browser.storage.session.set({
+        ...changes,
+        ipInfo: { ip, country: "xx" },
+      });
     }
-    await browser.storage.session.set({
-      modified: now.toLocaleString(),
-      ipInfo,
-    });
+  } else {
+    await browser.storage.session.set(changes);
   }
 }
 
