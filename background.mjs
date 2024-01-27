@@ -1,4 +1,4 @@
-import { produce } from "./dist/immer.mjs";
+import {produce} from "immer";
 
 let updateAddrInfo;
 let baseState = {};
