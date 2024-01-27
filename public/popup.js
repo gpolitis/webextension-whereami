@@ -15,5 +15,5 @@ browser.storage.session.onChanged.addListener(stateChanged);
 document.addEventListener("DOMContentLoaded", stateChanged)
 
 document.querySelector("button").addEventListener("click", function () {
-  void browser.runtime.sendMessage({ action: "update" });
+  browser.runtime.sendMessage({ action: "update" });
 });

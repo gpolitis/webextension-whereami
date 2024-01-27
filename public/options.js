@@ -1,6 +1,6 @@
 function saveOptions(e) {
   e.preventDefault();
-  void browser.storage.sync.set({
+  browser.storage.sync.set({
     token: document.querySelector(`#token`).value,
   });
 }

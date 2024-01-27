@@ -25,10 +25,24 @@ async function update() {
   }
 }
 
+function updateSafely() {
+  update()
+    .then(() => {
+      browser.action.setBadgeText({ text: "" });
+      browser.storage.session.remove("error");
+    })
+    .catch((error) => {
+      browser.storage.session.set({
+        error: error.toString(),
+      });
+      browser.action.setBadgeText({ text: "!" });
+    });
+}
+
 browser.runtime.onMessage.addListener(function (message) {
   switch (message.action) {
     case "update":
-      void update();
+      updateSafely();
       break;
   }
 });
@@ -36,7 +50,7 @@ browser.runtime.onMessage.addListener(function (message) {
 browser.storage.session.onChanged.addListener((changes) => {
   if (changes.ipInfo) {
     const json = changes.ipInfo.newValue;
-    void browser.action.setIcon({
+    browser.action.setIcon({
       path: {
         16: `icons/${json.country}.svg`.toLowerCase(),
         32: `icons/${json.country}.svg`.toLowerCase(),
@@ -46,5 +60,5 @@ browser.storage.session.onChanged.addListener((changes) => {
 });
 
 browser.alarms.create("periodic-update", { periodInMinutes: 0.5 });
-browser.alarms.onAlarm.addListener(update);
-void update()
+browser.alarms.onAlarm.addListener(updateSafely);
+updateSafely();
