@@ -1,8 +1,6 @@
 {
-  "dependencies": {
-    "@types/firefox-webext-browser": "^120.0.0"
-  },
   "devDependencies": {
+    "@types/firefox-webext-browser": "^120.0.0",
     "prettier": "^3.2.4"
   }
 }
